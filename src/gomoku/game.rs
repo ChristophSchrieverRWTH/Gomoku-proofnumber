@@ -8,7 +8,8 @@ pub struct Board {
     field: HashMap<(i32, i32), Tile>,
     player_one: bool,
     game_over: bool,
-    shapes: Rc<Shapes>,
+    shapes1: Rc<Shapes>,
+    shapes2: Rc<Shapes>,
     winner: Tile,
 }
 
@@ -39,7 +40,7 @@ impl Shapes {
 
 impl Board {
     /// Setup function only to be called once
-    pub fn setup(size: i32, shape: &mut Vec<(i32, i32)>) -> Board {
+    pub fn setup(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) -> Board {
         let mut field = HashMap::new();
         for i in 0..size {
             for j in 0..size {
@@ -52,7 +53,8 @@ impl Board {
             field,
             player_one: true,
             game_over: false,
-            shapes: Rc::new(Shapes::new(shape)),
+            shapes1: Rc::new(Shapes::new(shape1)),
+            shapes2: Rc::new(Shapes::new(shape2)),
             winner: Tile::Empty,
         }
     }
@@ -84,8 +86,13 @@ impl Board {
             self.winner = Tile::Empty;
             return true;
         }
+        let active_shapes = match self.player_to_move() {
+            Tile::One => &self.shapes1,
+            Tile::Two => &self.shapes2,
+            _ => panic!("Player_to_move returned empty, which should be impossible."),
+        };
         let mut over = false;
-        for shape in &self.shapes.shapes[..] {
+        for shape in &active_shapes.shapes[..] {
             'outer: for (s1, s2) in shape {
                 for (t1, t2) in shape {
                     let x = s1 - t1 + x_cord;

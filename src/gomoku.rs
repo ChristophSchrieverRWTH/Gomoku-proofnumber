@@ -5,11 +5,15 @@ use std::num::ParseIntError;
 
 mod game;
 
-pub fn play(size: i32, shape: &mut Vec<(i32, i32)>) -> Result<(), Error> {
+pub fn play(
+    size: i32,
+    shape1: &mut Vec<(i32, i32)>,
+    shape2: &mut Vec<(i32, i32)>,
+) -> Result<(), Error> {
     if size < 0 {
         return Err(Error::IllegalSize);
     }
-    let mut board = Board::setup(size, shape);
+    let mut board = Board::setup(size, shape1, shape2);
     println!("");
     while !board.is_over() {
         let announce = format!(
