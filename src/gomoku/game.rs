@@ -49,7 +49,7 @@ impl Board {
         }
         Board {
             size,
-            turn: 1,
+            turn: 0,
             field,
             player_one: true,
             game_over: false,
@@ -73,6 +73,7 @@ impl Board {
         }
         let active = self.player_to_move();
         self.field.insert((x_cord, y_cord), active);
+        self.turn += 1;
         self.game_over = self.game_over(x_cord, y_cord);
         if self.game_over {
             return Ok(());
@@ -82,10 +83,6 @@ impl Board {
     }
 
     pub fn game_over(&mut self, x_cord: i32, y_cord: i32) -> bool {
-        if self.turn == self.size.pow(2) as usize {
-            self.winner = Tile::Empty;
-            return true;
-        }
         let active_shapes = match self.player_to_move() {
             Tile::One => &self.shapes1,
             Tile::Two => &self.shapes2,
@@ -105,11 +102,19 @@ impl Board {
                         },
                     }
                 }
-                over = true;
                 self.winner = self.player_to_move();
+                return true;
             }
         }
+        if self.draw() {
+            over = true;
+            self.winner = Tile::Empty;
+        }
         over
+    }
+
+    pub fn draw(&self) -> bool {
+        self.turn == self.size.pow(2) as usize
     }
 
     pub fn is_over(&self) -> bool {

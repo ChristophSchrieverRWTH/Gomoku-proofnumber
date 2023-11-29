@@ -65,6 +65,7 @@ pub fn play(
                 "\nUnexpected Error occurred: {:?}. Please try different input:\n",
                 place
             );
+            continue;
         }
     }
     match board.winner() {
