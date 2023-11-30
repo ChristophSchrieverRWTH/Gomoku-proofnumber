@@ -3,14 +3,14 @@ use std::{collections::HashMap, fmt::Display, result::Result};
 
 #[derive(Debug)]
 pub struct Board {
-    size: i32,
-    turn: usize,
-    field: HashMap<(i32, i32), Tile>,
-    player_one: bool,
-    game_over: bool,
-    shapes1: Rc<Shapes>,
-    shapes2: Rc<Shapes>,
-    winner: Tile,
+    pub size: i32,
+    pub turn: usize,
+    pub field: HashMap<(i32, i32), Tile>,
+    pub player_one: bool,
+    pub game_over: bool,
+    pub shapes1: Rc<Shapes>,
+    pub shapes2: Rc<Shapes>,
+    pub winner: Tile,
 }
 
 #[derive(Debug)]
@@ -25,7 +25,7 @@ pub struct Shapes {
     shapes: Vec<Vec<(i32, i32)>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Tile {
     One,
     Two,

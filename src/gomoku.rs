@@ -1,9 +1,14 @@
 use self::game::Board;
+use self::tree::Tree;
 use crate::gomoku::game::Tile;
 use std::io;
 use std::num::ParseIntError;
 
 mod game;
+mod tree;
+pub enum Error {
+    IllegalSize,
+}
 
 pub fn play(
     size: i32,
@@ -77,6 +82,40 @@ pub fn play(
     Ok(())
 }
 
-pub enum Error {
-    IllegalSize,
+pub fn simulate_minmax(
+    size: i32,
+    shape1: &mut Vec<(i32, i32)>,
+    shape2: &mut Vec<(i32, i32)>,
+) -> &'static str {
+    let mut board = Board::setup(size, shape1, shape2);
+    let _x = board.place((size / 2) as i32, (size / 2) as i32);
+    let mut tree = Tree::new(size);
+    tree.legal
+        .insert(((size / 2) as i32, (size / 2) as i32), false);
+    let value = tree.minimax(&mut board, true, 0);
+    match value {
+        1 => "Player one wins.",
+        2 => "Player two wins.",
+        0 => "Draw",
+        _ => "",
+    }
+}
+
+pub fn simulate_alphabeta(
+    size: i32,
+    shape1: &mut Vec<(i32, i32)>,
+    shape2: &mut Vec<(i32, i32)>,
+) -> &'static str {
+    let mut board = Board::setup(size, shape1, shape2);
+    let _x = board.place((size / 2) as i32, (size / 2) as i32);
+    let mut tree = Tree::new(size);
+    tree.legal
+        .insert(((size / 2) as i32, (size / 2) as i32), false);
+    let value = tree.alphabeta(&mut board, true, -2, 2);
+    match value {
+        1 => "Player one wins.",
+        2 => "Player two wins.",
+        0 => "Draw",
+        _ => "wat",
+    }
 }
