@@ -1,6 +1,6 @@
 use crate::gomoku::game::*;
 use std::cmp;
-use std::{collections::HashMap, rc::Rc};
+use std::collections::HashMap;
 
 pub struct Tree {
     pub legal: HashMap<(i32, i32), bool>,
@@ -39,7 +39,7 @@ impl Tree {
         hm
     }
 
-    pub fn minimax(&mut self, board: &mut Board, maximizer: bool, depth: usize) -> i32 {
+    pub fn _minimax(&mut self, board: &mut Board, maximizer: bool, depth: usize) -> i32 {
         if board.is_over() {
             return self.evaluate(&board);
         }
@@ -55,7 +55,7 @@ impl Tree {
                 board.place_proof(x_cord, y_cord);
                 self.legal.insert((x_cord, y_cord), false);
 
-                let current_val = self.minimax(board, false, d);
+                let current_val = self._minimax(board, false, d);
                 self.legal.insert((x_cord, y_cord), true);
                 if current_val == 1 {
                     return 1;
@@ -71,7 +71,7 @@ impl Tree {
                 }
                 board.place_proof(x_cord, y_cord);
                 self.legal.insert((x_cord, y_cord), false);
-                let current_val = self.minimax(board, true, d);
+                let current_val = self._minimax(board, true, d);
                 self.legal.insert((x_cord, y_cord), true);
                 if current_val == -1 {
                     return -1;
@@ -83,7 +83,7 @@ impl Tree {
         best_val
     }
 
-    pub fn alphabeta(&mut self, board: &mut Board, maximizer: bool, alpha: i32, beta: i32) -> i32 {
+    pub fn _alphabeta(&mut self, board: &mut Board, maximizer: bool, alpha: i32, beta: i32) -> i32 {
         if board.is_over() {
             return self.evaluate(&board);
         }
@@ -95,7 +95,7 @@ impl Tree {
             for ((x_cord, y_cord), _) in self.expand() {
                 board.place_proof(x_cord, y_cord);
                 self.legal.insert((x_cord, y_cord), false);
-                val = self.alphabeta(board, false, new_alpha, beta);
+                val = self._alphabeta(board, false, new_alpha, beta);
                 self.legal.insert((x_cord, y_cord), true);
                 if val > beta {
                     break;
@@ -109,7 +109,7 @@ impl Tree {
             for ((x_cord, y_cord), _) in self.expand() {
                 board.place_proof(x_cord, y_cord);
                 self.legal.insert((x_cord, y_cord), false);
-                val = self.alphabeta(board, true, alpha, new_beta);
+                val = self._alphabeta(board, true, alpha, new_beta);
                 self.legal.insert((x_cord, y_cord), true);
                 if val < alpha {
                     break;

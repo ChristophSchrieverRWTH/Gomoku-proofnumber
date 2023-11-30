@@ -13,10 +13,10 @@ pub struct Board {
 }
 
 #[derive(Debug)]
-pub enum Error {
-    CordIllegalLarge,
-    CordIllegalSmall,
-    AlreadyOccupied,
+pub enum _Error {
+    _CordIllegalLarge,
+    _CordIllegalSmall,
+    _AlreadyOccupied,
 }
 
 #[derive(Debug)]
@@ -58,7 +58,7 @@ impl Board {
         }
     }
 
-    pub fn reset(&mut self) {
+    pub fn _reset(&mut self) {
         for i in 0..self.size {
             for j in 0..self.size {
                 self.field.insert((i, j), Tile::Empty);
@@ -67,15 +67,15 @@ impl Board {
     }
 
     /// Places ones stone at coordinates x, y assuming it is still empty and on the board.
-    pub fn place_play(&mut self, x_cord: i32, y_cord: i32) -> Result<(), Error> {
+    pub fn _place_play(&mut self, x_cord: i32, y_cord: i32) -> Result<(), _Error> {
         if x_cord >= self.size || y_cord >= self.size {
-            return Err(Error::CordIllegalLarge);
+            return Err(_Error::_CordIllegalLarge);
         }
         if x_cord < 0 || y_cord < 0 {
-            return Err(Error::CordIllegalSmall);
+            return Err(_Error::_CordIllegalSmall);
         }
         if self.field.get(&(x_cord, y_cord)).unwrap() != &Tile::Empty {
-            return Err(Error::AlreadyOccupied);
+            return Err(_Error::_AlreadyOccupied);
         }
         let active = self.player_to_move();
         self.field.insert((x_cord, y_cord), active);
@@ -96,7 +96,7 @@ impl Board {
         }
     }
 
-    pub fn undo(&mut self, x_cord: i32, y_cord: i32) {
+    pub fn _undo(&mut self, x_cord: i32, y_cord: i32) {
         self.field.insert((x_cord, y_cord), Tile::Empty);
         self.turn -= 1;
         if !self.game_over(x_cord, y_cord) {

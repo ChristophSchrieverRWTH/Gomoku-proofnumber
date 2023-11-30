@@ -6,17 +6,17 @@ use std::num::ParseIntError;
 
 mod game;
 mod tree;
-pub enum Error {
+pub enum _Error {
     IllegalSize,
 }
 
-pub fn play(
+pub fn _play(
     size: i32,
     shape1: &mut Vec<(i32, i32)>,
     shape2: &mut Vec<(i32, i32)>,
-) -> Result<(), Error> {
+) -> Result<(), _Error> {
     if size < 0 {
-        return Err(Error::IllegalSize);
+        return Err(_Error::IllegalSize);
     }
     let mut board = Board::setup(size, shape1, shape2);
     println!("");
@@ -64,7 +64,7 @@ pub fn play(
             y = numbered[1];
             clean = true;
         }
-        let place = board.place_play(x, y);
+        let place = board._place_play(x, y);
         if place.is_err() {
             println!(
                 "\nUnexpected Error occurred: {:?}. Please try different input:\n",
@@ -82,7 +82,7 @@ pub fn play(
     Ok(())
 }
 
-pub fn simulate_minmax(
+pub fn _simulate_minmax(
     size: i32,
     shape1: &mut Vec<(i32, i32)>,
     shape2: &mut Vec<(i32, i32)>,
@@ -92,7 +92,7 @@ pub fn simulate_minmax(
     let mut tree = Tree::new(size);
     tree.legal
         .insert(((size / 2) as i32, (size / 2) as i32), false);
-    let value = tree.minimax(&mut board, true, 0);
+    let value = tree._minimax(&mut board, true, 0);
     match value {
         1 => "Player one wins.",
         2 => "Player two wins.",
@@ -101,7 +101,7 @@ pub fn simulate_minmax(
     }
 }
 
-pub fn simulate_alphabeta(
+pub fn _simulate_alphabeta(
     size: i32,
     shape1: &mut Vec<(i32, i32)>,
     shape2: &mut Vec<(i32, i32)>,
@@ -111,7 +111,7 @@ pub fn simulate_alphabeta(
     let mut tree = Tree::new(size);
     tree.legal
         .insert(((size / 2) as i32, (size / 2) as i32), false);
-    let value = tree.alphabeta(&mut board, true, -2, 2);
+    let value = tree._alphabeta(&mut board, true, -2, 2);
     match value {
         1 => "Player one wins.",
         2 => "Player two wins.",
