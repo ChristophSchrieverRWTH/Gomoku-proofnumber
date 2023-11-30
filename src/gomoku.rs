@@ -64,7 +64,7 @@ pub fn play(
             y = numbered[1];
             clean = true;
         }
-        let place = board.place(x, y);
+        let place = board.place_play(x, y);
         if place.is_err() {
             println!(
                 "\nUnexpected Error occurred: {:?}. Please try different input:\n",
@@ -88,7 +88,7 @@ pub fn simulate_minmax(
     shape2: &mut Vec<(i32, i32)>,
 ) -> &'static str {
     let mut board = Board::setup(size, shape1, shape2);
-    let _x = board.place((size / 2) as i32, (size / 2) as i32);
+    board.place_proof((size / 2) as i32, (size / 2) as i32);
     let mut tree = Tree::new(size);
     tree.legal
         .insert(((size / 2) as i32, (size / 2) as i32), false);
@@ -107,7 +107,7 @@ pub fn simulate_alphabeta(
     shape2: &mut Vec<(i32, i32)>,
 ) -> &'static str {
     let mut board = Board::setup(size, shape1, shape2);
-    let _x = board.place((size / 2) as i32, (size / 2) as i32);
+    board.place_proof((size / 2) as i32, (size / 2) as i32);
     let mut tree = Tree::new(size);
     tree.legal
         .insert(((size / 2) as i32, (size / 2) as i32), false);

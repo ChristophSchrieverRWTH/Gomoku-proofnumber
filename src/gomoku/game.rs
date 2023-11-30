@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use std::{collections::HashMap, fmt::Display, result::Result};
 
 #[derive(Debug)]
@@ -8,8 +7,8 @@ pub struct Board {
     pub field: HashMap<(i32, i32), Tile>,
     pub player_one: bool,
     pub game_over: bool,
-    pub shapes1: Rc<Shapes>,
-    pub shapes2: Rc<Shapes>,
+    pub shapes1: Shapes,
+    pub shapes2: Shapes,
     pub winner: Tile,
 }
 
@@ -53,15 +52,22 @@ impl Board {
             field,
             player_one: true,
             game_over: false,
-            shapes1: Rc::new(Shapes::new(shape1)),
-            shapes2: Rc::new(Shapes::new(shape2)),
+            shapes1: Shapes::new(shape1),
+            shapes2: Shapes::new(shape2),
             winner: Tile::Empty,
         }
     }
-    /// Places ones stone at coordinates x, y assuming it is still empty and on the board.
-    ///
 
-    pub fn place(&mut self, x_cord: i32, y_cord: i32) -> Result<(), Error> {
+    pub fn reset(&mut self) {
+        for i in 0..self.size {
+            for j in 0..self.size {
+                self.field.insert((i, j), Tile::Empty);
+            }
+        }
+    }
+
+    /// Places ones stone at coordinates x, y assuming it is still empty and on the board.
+    pub fn place_play(&mut self, x_cord: i32, y_cord: i32) -> Result<(), Error> {
         if x_cord >= self.size || y_cord >= self.size {
             return Err(Error::CordIllegalLarge);
         }
@@ -80,6 +86,22 @@ impl Board {
         }
         self.player_one = !self.player_one;
         Ok(())
+    }
+
+    pub fn place_proof(&mut self, x_cord: i32, y_cord: i32) {
+        self.field.insert((x_cord, y_cord), self.player_to_move());
+        self.turn += 1;
+        if !self.game_over(x_cord, y_cord) {
+            self.player_one = !self.player_one;
+        }
+    }
+
+    pub fn undo(&mut self, x_cord: i32, y_cord: i32) {
+        self.field.insert((x_cord, y_cord), Tile::Empty);
+        self.turn -= 1;
+        if !self.game_over(x_cord, y_cord) {
+            self.player_one = !self.player_one;
+        }
     }
 
     pub fn game_over(&mut self, x_cord: i32, y_cord: i32) -> bool {
