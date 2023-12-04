@@ -1,13 +1,38 @@
 use self::game::Board;
 use self::tree::Tree;
 use crate::gomoku::game::Tile;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::io;
 use std::num::ParseIntError;
 
 mod game;
+mod pns;
 mod tree;
 pub enum _Error {
     IllegalSize,
+}
+
+pub fn test(shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) {
+    let mut b1 = Board::setup(3, shape1, shape2);
+    let mut b2 = Board::setup(3, shape1, shape2);
+    b1.place_proof(0, 0);
+    b1.place_proof(0, 1);
+    b1.place_proof(1, 0);
+    b2.place_proof(1, 0);
+    b2.place_proof(0, 1);
+    b2.place_proof(0, 0);
+    let x = calculate_hash(&b2.field);
+    let y = calculate_hash(&b1.field);
+    println!("{x}");
+    println!("{y}");
+    assert!(x == y);
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
 
 pub fn _play(

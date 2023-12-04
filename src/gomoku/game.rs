@@ -1,10 +1,10 @@
-use std::{collections::HashMap, fmt::Display, result::Result};
+use std::{collections::BTreeMap, fmt::Display, result::Result};
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct Board {
     pub size: i32,
     pub turn: usize,
-    pub field: HashMap<(i32, i32), Tile>,
+    pub field: BTreeMap<(i32, i32), Tile>,
     pub player_one: bool,
     pub game_over: bool,
     pub shapes1: Shapes,
@@ -19,12 +19,12 @@ pub enum _Error {
     _AlreadyOccupied,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct Shapes {
     shapes: Vec<Vec<(i32, i32)>>,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Hash)]
 pub enum Tile {
     One,
     Two,
@@ -40,7 +40,7 @@ impl Shapes {
 impl Board {
     /// Setup function only to be called once
     pub fn setup(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) -> Board {
-        let mut field = HashMap::new();
+        let mut field = BTreeMap::new();
         for i in 0..size {
             for j in 0..size {
                 field.insert((i as i32, j as i32), Tile::Empty);
