@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::gomoku::game::*;
 use std::cmp;
 use std::collections::HashMap;
