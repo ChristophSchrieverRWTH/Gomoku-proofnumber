@@ -2,29 +2,44 @@
 use std::rc::Rc;
 type Turn = (i32, i32);
 
-struct PNS {
-    path: Vec<Turn>,
+pub struct PNS {
+    path: Vec<usize>,
 }
 
 impl PNS {
-    fn get_parent(&mut self) -> &mut Node {
-        todo!()
+    // fn get_parent<'a>(&'a mut self, root: &'a mut Node) -> &'a mut Node {
+    //     let mut current = root;
+    //     let mut next = Some(&mut current.children[self.path[0]]);
+    //     for i in 1..self.path.len() - 1 {
+    //         current = next.take().unwrap();
+    //         let child = &mut current.children[self.path[i]];
+    //         next = Some(child);
+    //     }
+    //     current
+    // }
+
+    pub fn get_parent<'root>(self, root: &'root mut Node) -> (&'root mut Node, PNS) {
+        let mut current = &mut root.children[self.path[0]];
+        for i in 1..self.path.len() - 1 {
+            let child = &mut current.children[self.path[i]];
+            current = child;
+        }
+        (current, self)
     }
 
-    fn get_node(&self) -> &mut Node {
+    pub fn get_node(&self) -> &mut Node {
         todo!()
     }
 }
 
 #[derive(Debug, Clone)]
-struct Node {
+pub struct Node {
     depth: usize,
     proof: i32,
     disproof: i32,
     expanded: bool,
     state: Status,
     node_type: NodeType,
-    parent: Rc<Node>,
     children: Vec<Node>,
 }
 
@@ -42,35 +57,35 @@ pub enum NodeType {
 }
 
 impl Node {
-    fn new(parent: Rc<Node>) -> Self {
+    pub fn new() -> Self {
         Node {
             depth: 0,
             proof: 1,
             disproof: 1,
             expanded: false,
             state: Status::Unknown,
-            parent,
             node_type: NodeType::AND,
             children: vec![],
         }
     }
 }
 
-fn pns(mut root: Node) {
+pub fn pns(mut root: Node) {
     evaluate(&mut root);
     set_numbers(&mut root);
-    let mut current: &mut Node = &mut root.clone();
+    let mut current: &mut Node = &mut root;
     let mut most_proving: &mut Node;
+    let mut pns = PNS { path: vec![] };
     while root.proof != 0 && root.disproof != 0 {
         most_proving = select_most_proving(current);
         expand(most_proving);
-        current = update_ancestors(most_proving, &root);
+        (current, pns) = update_ancestors(most_proving, &mut root, pns);
     }
 }
 
-fn evaluate(node: &mut Node) {}
+pub fn evaluate(node: &mut Node) {}
 
-fn set_numbers(node: &mut Node) {
+pub fn set_numbers(node: &mut Node) {
     if node.expanded {
         if node.node_type == NodeType::AND {
             node.proof = 0;
@@ -109,7 +124,7 @@ fn set_numbers(node: &mut Node) {
     }
 }
 
-fn select_most_proving(node: &mut Node) -> &mut Node {
+pub fn select_most_proving(node: &mut Node) -> &mut Node {
     let mut current = node;
     let mut value = f32::INFINITY as i32;
     let mut best = None;
@@ -136,7 +151,7 @@ fn select_most_proving(node: &mut Node) -> &mut Node {
     current
 }
 
-fn expand(node: &mut Node) {
+pub fn expand(node: &mut Node) {
     generate_children(node);
     for child in &mut node.children {
         evaluate(child);
@@ -150,21 +165,25 @@ fn expand(node: &mut Node) {
     node.expanded = true;
 }
 
-fn update_ancestors<'a>(node: &'a mut Node, root: &Node) -> &'a mut Node {
-    let node = node;
+pub fn update_ancestors<'a>(
+    node: &'a mut Node,
+    root: &'a mut Node,
+    mut pns: PNS,
+) -> (&'a mut Node, PNS) {
+    let mut node = node;
     loop {
-        let oldProof = node.proof;
-        let oldDisproof = node.disproof;
-        if node.proof == oldProof && node.disproof == oldDisproof {
-            return node;
+        let old_proof = node.proof;
+        let old_disproof = node.disproof;
+        if node.proof == old_proof && node.disproof == old_disproof {
+            return (node, pns);
         }
         if node.depth == 0 {
-            return node;
+            return (node, pns);
         }
-        node = node.parent;
+        (node, pns) = PNS::get_parent(pns, root);
     }
 }
 
-fn generate_children(node: &mut Node) {
+pub fn generate_children(node: &mut Node) {
     node.children = vec![];
 }
