@@ -1,5 +1,6 @@
 use self::game::Board;
-use self::pns::*;
+use self::graph::PNS;
+// use self::pns::*;
 use self::tree::Tree;
 use crate::gomoku::game::Tile;
 use std::collections::hash_map::DefaultHasher;
@@ -9,14 +10,21 @@ use std::num::ParseIntError;
 
 mod game;
 mod graph;
-mod pns;
+// mod pns;
 mod tree;
 pub enum _Error {
     IllegalSize,
 }
 
 pub fn test(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) {
-    let mut root = Node::new();
+    let mut pns = PNS::setup(size);
+    println!("{:?}", pns);
+    pns.generate_children(pns.root);
+    println!("-----------------------");
+    for (_, node) in pns.tree {
+        println!("{:?}", node);
+        println!("------------")
+    }
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
