@@ -98,7 +98,7 @@ impl Board {
         }
     }
 
-    pub fn _undo(&mut self, x_cord: i32, y_cord: i32) {
+    pub fn undo(&mut self, x_cord: i32, y_cord: i32) {
         self.field.insert((x_cord, y_cord), Tile::Empty);
         self.turn -= 1;
         if !self.game_over(x_cord, y_cord) {

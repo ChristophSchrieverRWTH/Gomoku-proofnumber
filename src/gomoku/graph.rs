@@ -3,6 +3,7 @@ use super::game::*;
 use slotmap::{new_key_type, SlotMap};
 use std::cmp::min;
 use std::collections::HashSet;
+use std::{thread, time};
 
 new_key_type! {pub struct Key;}
 type Turn = (i32, i32);
@@ -28,7 +29,7 @@ pub struct Node {
     children: Vec<Key>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Status {
     Disproven,
     Proven,
@@ -78,7 +79,121 @@ impl PNS {
     pub fn pns(&mut self, root_key: Key) -> Status {
         self.evaluate(root_key);
         self.set_numbers(root_key);
-        Status::Proven
+        let mut current = root_key.clone();
+        let mut most_proving: Key;
+        let mut counter = 0;
+        loop {
+            println!("\n\n $$$$$$$$$$$$$$$$");
+            // for (_, node) in &self.tree {
+            //     println!("{:?}", node);
+            //     println!("------------")
+            // }
+            let root = self.tree.get(root_key).unwrap();
+            if root.proof == 0 || root.disproof == 0 {
+                break;
+            }
+            println!("At most proving");
+            most_proving = self.select_mpv(current);
+            println!("At expanding");
+            self.expand(most_proving);
+            println!("At updating");
+            current = self.update_ancestors(most_proving, root_key);
+        }
+        self.tree.get(root_key).unwrap().state
+    }
+
+    pub fn update_ancestors(&mut self, key: Key, root_key: Key) -> Key {
+        let mut node_key = key;
+        loop {
+            let node = self.tree.get(node_key).unwrap();
+            let old_proof = node.proof; // maybe clone
+            let old_disproof = node.disproof;
+            self.set_numbers(key);
+            let node = self.tree.get_mut(node_key).unwrap();
+            if node.proof == old_proof {
+                node.disproof = old_disproof;
+                return node_key;
+            }
+            if node_key == root_key {
+                return node_key;
+            }
+            node_key = node.parent.unwrap();
+            let turn = node.turn.unwrap();
+            self.board.undo(turn.0, turn.1);
+            self.legal.insert(turn);
+        }
+    }
+
+    pub fn select_mpv(&mut self, key: Key) -> Key {
+        let ten_millis = time::Duration::from_millis(400);
+        let now = time::Instant::now();
+        let mut best = key;
+        let mut answer_key = key;
+        loop {
+            thread::sleep(ten_millis);
+            println!("--------------------");
+            println!("Player 1 to move: {}", self.board.player_one);
+            println!("{}", self.board.to_string());
+            println!("-------------------");
+            let mut value = f32::INFINITY as i32;
+            println!("{:?}", self.board.turn);
+            println!("{:?}", self.legal);
+            let node = self.tree.get(answer_key).unwrap();
+            println!("{:?}", node);
+            let n_type = node.node_type.clone();
+            if !node.expanded {
+                break;
+            }
+            match n_type {
+                NodeType::OR => {
+                    for child_key in &node.children {
+                        let child = self.tree.get(*child_key).unwrap();
+                        if value > child.proof {
+                            best = *child_key;
+                            value = child.proof;
+                        }
+                    }
+                }
+                NodeType::AND => {
+                    for child_key in &node.children {
+                        let child = self.tree.get(*child_key).unwrap();
+                        if value > child.disproof {
+                            best = *child_key;
+                            value = child.disproof;
+                        }
+                    }
+                }
+            }
+            let turn = self.tree.get(best).unwrap().turn.unwrap();
+            println!("Turn to remove: {:?}", turn);
+            self.board.place_proof(turn.0, turn.1);
+            self.legal.remove(&turn);
+            answer_key = best;
+        }
+        answer_key
+    }
+
+    pub fn expand(&mut self, key: Key) {
+        self.generate_children(key);
+        let node = self.tree.get(key).unwrap();
+        let n_type = node.node_type.clone();
+        let children = node.children.clone();
+        for child_key in children {
+            let child = self.tree.get(child_key).unwrap();
+            let turn = child.turn.expect("Function should not be called on root");
+            self.board.place_proof(turn.0, turn.1);
+            self.evaluate(child_key);
+            self.set_numbers(child_key);
+            let child = self.tree.get(child_key).unwrap();
+            self.board.undo(turn.0, turn.1);
+            if (n_type == NodeType::OR && child.proof == 0)
+                || (n_type == NodeType::AND && child.disproof == 0)
+            {
+                break;
+            }
+        }
+        let node = self.tree.get_mut(key).unwrap();
+        node.expanded = true;
     }
 
     pub fn generate_children(&mut self, key: Key) {
@@ -135,7 +250,7 @@ impl PNS {
                     temp_disproof = f32::INFINITY as i32;
                     for child_key in &node.children {
                         let child = self.tree.get(*child_key).unwrap();
-                        temp_proof = temp_proof + child.proof;
+                        temp_proof = temp_proof.saturating_add(child.proof);
                         temp_disproof = min(child.disproof, temp_disproof);
                     }
                 }
@@ -144,7 +259,7 @@ impl PNS {
                     temp_disproof = 0;
                     for child_key in &node.children {
                         let child = self.tree.get(*child_key).unwrap();
-                        temp_disproof = temp_disproof + child.disproof;
+                        temp_disproof = temp_disproof.saturating_add(child.disproof);
                         temp_proof = min(child.proof, temp_proof);
                     }
                 }

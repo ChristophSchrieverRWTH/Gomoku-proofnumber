@@ -19,39 +19,8 @@ pub enum _Error {
 
 pub fn test(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) {
     let mut pns = PNS::setup(size, shape1, shape2, true);
-    // println!("{:?}", pns);
-    // pns.generate_children(pns.root);
-    // println!("-----------------------");
-    // for (_, node) in &pns.tree {
-    //     println!("{:?}", node);
-    //     println!("------------")
-    // }
-    // let mut target_key = pns.root;
-    // for (key, node) in &pns.tree {
-    //     if key == pns.root {
-    //         continue;
-    //     }
-    //     let (x, y) = node.turn.unwrap();
-    //     if x == size / 2 as i32 && y == size / 2 as i32 {
-    //         target_key = key;
-    //         break;
-    //     }
-    // }
-    // println!("\n---------------------\n");
-    // pns.legal.remove(&(size / 2 as i32, size / 2 as i32));
-    // pns.generate_children(target_key);
-    // for (_, node) in &pns.tree {
-    //     println!("{:?}", node);
-    //     println!("------------")
-    // }
-    pns.generate_children(pns.root);
-    pns.tree.get_mut(pns.root).unwrap().expanded = true;
-    pns.pns(pns.root);
-    pns.set_numbers(pns.root);
-    for (_, node) in &pns.tree {
-        println!("{:?}", node);
-        println!("------------")
-    }
+    let state = pns.pns(pns.root);
+    println!("{:?}", state);
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
