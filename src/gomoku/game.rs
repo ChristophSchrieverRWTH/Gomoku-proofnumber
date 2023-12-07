@@ -93,17 +93,17 @@ impl Board {
         self.field.insert((x_cord, y_cord), self.player_to_move());
         self.turn += 1;
         self.game_over = self.game_over(x_cord, y_cord);
-        if !self.game_over(x_cord, y_cord) {
-            self.player_one = !self.player_one;
-        }
+        // if !self.game_over {
+        self.player_one = !self.player_one;
+        // }
     }
 
     pub fn undo(&mut self, x_cord: i32, y_cord: i32) {
         self.field.insert((x_cord, y_cord), Tile::Empty);
         self.turn -= 1;
-        if !self.game_over(x_cord, y_cord) {
-            self.player_one = !self.player_one;
-        }
+        // if !self.game_over(x_cord, y_cord) {
+        self.player_one = !self.player_one;
+        // }
     }
 
     pub fn game_over(&mut self, x_cord: i32, y_cord: i32) -> bool {

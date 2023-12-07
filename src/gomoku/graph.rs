@@ -76,39 +76,35 @@ impl PNS {
         }
     }
 
-    pub fn pns(&mut self, root_key: Key) -> Status {
+    pub fn pns(&mut self, root_key: Key) -> (i32, i32) {
         self.evaluate(root_key);
         self.set_numbers(root_key);
         let mut current = root_key.clone();
         let mut most_proving: Key;
-        let mut counter = 0;
         loop {
-            println!("\n\n $$$$$$$$$$$$$$$$");
-            // for (_, node) in &self.tree {
-            //     println!("{:?}", node);
-            //     println!("------------")
-            // }
             let root = self.tree.get(root_key).unwrap();
+            // println!(
+            //     "Root proofnumber: {}, Root disproofnumber: {}",
+            //     root.proof, root.disproof
+            // );
             if root.proof == 0 || root.disproof == 0 {
                 break;
             }
-            println!("At most proving");
-            most_proving = self.select_mpv(current);
-            println!("At expanding");
+            most_proving = self.select_mpn(current);
             self.expand(most_proving);
-            println!("At updating");
             current = self.update_ancestors(most_proving, root_key);
         }
-        self.tree.get(root_key).unwrap().state
+        let root = self.tree.get(root_key).unwrap();
+        (root.proof, root.disproof)
     }
 
     pub fn update_ancestors(&mut self, key: Key, root_key: Key) -> Key {
         let mut node_key = key;
         loop {
             let node = self.tree.get(node_key).unwrap();
-            let old_proof = node.proof; // maybe clone
-            let old_disproof = node.disproof;
-            self.set_numbers(key);
+            let old_proof = node.proof.clone(); // maybe clone
+            let old_disproof = node.disproof.clone();
+            self.set_numbers(node_key);
             let node = self.tree.get_mut(node_key).unwrap();
             if node.proof == old_proof {
                 node.disproof = old_disproof;
@@ -124,22 +120,14 @@ impl PNS {
         }
     }
 
-    pub fn select_mpv(&mut self, key: Key) -> Key {
-        let ten_millis = time::Duration::from_millis(400);
+    pub fn select_mpn(&mut self, key: Key) -> Key {
+        let ten_millis = time::Duration::from_millis(300);
         let now = time::Instant::now();
         let mut best = key;
         let mut answer_key = key;
         loop {
-            thread::sleep(ten_millis);
-            println!("--------------------");
-            println!("Player 1 to move: {}", self.board.player_one);
-            println!("{}", self.board.to_string());
-            println!("-------------------");
             let mut value = f32::INFINITY as i32;
-            println!("{:?}", self.board.turn);
-            println!("{:?}", self.legal);
             let node = self.tree.get(answer_key).unwrap();
-            println!("{:?}", node);
             let n_type = node.node_type.clone();
             if !node.expanded {
                 break;
@@ -165,7 +153,6 @@ impl PNS {
                 }
             }
             let turn = self.tree.get(best).unwrap().turn.unwrap();
-            println!("Turn to remove: {:?}", turn);
             self.board.place_proof(turn.0, turn.1);
             self.legal.remove(&turn);
             answer_key = best;
