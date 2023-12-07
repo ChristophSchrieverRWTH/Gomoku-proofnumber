@@ -1,19 +1,22 @@
+#![allow(unused)]
+use super::game::*;
 use slotmap::{new_key_type, SlotMap};
 use std::collections::HashSet;
 
 new_key_type! {pub struct Key;}
 type Turn = (i32, i32);
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct PNS {
     pub tree: SlotMap<Key, Node>,
     pub root: Key,
     pub legal: HashSet<Turn>,
+    pub board: Board,
 }
 
 #[derive(Debug, Clone)]
 pub struct Node {
-    turn: Option<Turn>,
+    pub turn: Option<Turn>,
     proof: i32,
     disproof: i32,
     expanded: bool,
@@ -37,7 +40,7 @@ pub enum NodeType {
 }
 
 impl PNS {
-    pub fn setup(size: i32) -> Self {
+    pub fn setup(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) -> Self {
         let mut hs = HashSet::new();
         for i in 0..size {
             for j in 0..size {
@@ -60,6 +63,7 @@ impl PNS {
             tree: sm,
             root: key,
             legal: hs,
+            board: Board::setup(size, shape1, shape2),
         }
     }
 

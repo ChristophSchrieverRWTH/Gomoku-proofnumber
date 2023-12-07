@@ -1,3 +1,4 @@
+#![allow(unused)]
 use self::game::Board;
 use self::graph::PNS;
 // use self::pns::*;
@@ -17,11 +18,29 @@ pub enum _Error {
 }
 
 pub fn test(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) {
-    let mut pns = PNS::setup(size);
+    let mut pns = PNS::setup(size, shape1, shape2);
     println!("{:?}", pns);
     pns.generate_children(pns.root);
     println!("-----------------------");
-    for (_, node) in pns.tree {
+    for (_, node) in &pns.tree {
+        println!("{:?}", node);
+        println!("------------")
+    }
+    let mut target_key = pns.root;
+    for (key, node) in &pns.tree {
+        if key == pns.root {
+            continue;
+        }
+        let (x, y) = node.turn.unwrap();
+        if x == size / 2 as i32 && y == size / 2 as i32 {
+            target_key = key;
+            break;
+        }
+    }
+    println!("\n---------------------\n");
+    pns.legal.remove(&(size / 2 as i32, size / 2 as i32));
+    pns.generate_children(target_key);
+    for (_, node) in &pns.tree {
         println!("{:?}", node);
         println!("------------")
     }
@@ -44,6 +63,7 @@ pub fn _play(
     let mut board = Board::setup(size, shape1, shape2);
     println!("");
     while !board.is_over() {
+        println!("{}", board.is_over());
         let announce = format!(
             "\nIt is player {}'s turn to move: \n
 ---------------------------------\n",
@@ -87,14 +107,15 @@ pub fn _play(
             y = numbered[1];
             clean = true;
         }
-        let place = board._place_play(x, y);
-        if place.is_err() {
-            println!(
-                "\nUnexpected Error occurred: {:?}. Please try different input:\n",
-                place
-            );
-            continue;
-        }
+        // let place = board._place_play(x, y);
+        board.place_proof(x, y);
+        // if place.is_err() {
+        //     println!(
+        //         "\nUnexpected Error occurred: {:?}. Please try different input:\n",
+        //         place
+        //     );
+        //     continue;
+        // }
     }
     match board.winner() {
         Tile::Empty => println!("\nThe game ended a draw.\n"),
