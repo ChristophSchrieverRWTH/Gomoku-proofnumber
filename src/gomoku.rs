@@ -18,7 +18,7 @@ pub enum _Error {
 }
 
 pub fn test(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) {
-    let mut pns = PNS::setup(size, shape1, shape2);
+    let mut pns = PNS::setup(size, shape1, shape2, true);
     println!("{:?}", pns);
     pns.generate_children(pns.root);
     println!("-----------------------");

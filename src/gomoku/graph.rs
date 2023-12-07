@@ -12,6 +12,7 @@ pub struct PNS {
     pub root: Key,
     pub legal: HashSet<Turn>,
     pub board: Board,
+    pub draw_is_loss: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -40,7 +41,12 @@ pub enum NodeType {
 }
 
 impl PNS {
-    pub fn setup(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) -> Self {
+    pub fn setup(
+        size: i32,
+        shape1: &mut Vec<(i32, i32)>,
+        shape2: &mut Vec<(i32, i32)>,
+        draw_is_loss: bool,
+    ) -> Self {
         let mut hs = HashSet::new();
         for i in 0..size {
             for j in 0..size {
@@ -64,6 +70,7 @@ impl PNS {
             root: key,
             legal: hs,
             board: Board::setup(size, shape1, shape2),
+            draw_is_loss,
         }
     }
 
@@ -90,5 +97,19 @@ impl PNS {
         }
         let parent = self.tree.get_mut(key).unwrap();
         parent.children = child_keys;
+    }
+
+    pub fn evaluate(&self, key: Key) -> Status {
+        if key == self.root || !self.board.is_over() {
+            return Status::Unknown;
+        }
+        match self.board.winner {
+            Tile::One => Status::Proven,
+            Tile::Two => Status::Disproven,
+            Tile::Empty => match self.draw_is_loss {
+                true => Status::Disproven,
+                false => Status::Proven,
+            },
+        }
     }
 }
