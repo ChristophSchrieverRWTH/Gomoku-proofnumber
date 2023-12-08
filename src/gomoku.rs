@@ -17,24 +17,16 @@ pub enum _Error {
     IllegalSize,
 }
 
-pub fn basic_pns(
+pub fn test(
     size: i32,
     shape1: &mut Vec<(i32, i32)>,
     shape2: &mut Vec<(i32, i32)>,
+    draw_is_loss: bool,
     moves_made: Vec<(i32, i32)>,
 ) {
-    let mut pns = PNS::setup(size, shape1, shape2, true, moves_made.clone());
-    let state_is_loss = pns.pns(pns.root);
-    if state_is_loss.0 != 0 {
-        let mut pns = PNS::setup(size, shape1, shape2, false, moves_made);
-        let state_is_win = pns.pns(pns.root);
-        match state_is_win.0 {
-            0 => println!("Draw"),
-            _ => println!("Player 2 wins"),
-        }
-    } else {
-        println!("Player 1 wins");
-    }
+    let mut pns = PNS::setup(size, shape1, shape2, draw_is_loss, moves_made);
+    let state = pns.pns(pns.root);
+    println!("{:?}", state);
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
