@@ -4,6 +4,8 @@ use slotmap::{new_key_type, SlotMap};
 use std::cmp::min;
 use std::collections::HashSet;
 use std::{thread, time};
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
 
 new_key_type! {pub struct Key;}
 type Turn = (i32, i32);
@@ -15,6 +17,7 @@ pub struct PNS {
     pub legal: HashSet<Turn>,
     pub board: Board,
     pub draw_is_loss: bool,
+    pub hashes: HashSet<u64>,
 }
 
 #[derive(Debug, Clone)]
@@ -62,9 +65,12 @@ impl PNS {
             0 => NodeType::OR,
             _ => NodeType::AND,
         };
+        let mut hashes = HashSet::new();
         for (x_cord, y_cord) in moves_made {
             board.place_proof(x_cord, y_cord);
+            let board_hash = calculate_hash(&board.field);
             hs.remove(&(x_cord, y_cord));
+            hashes.insert(board_hash);
         }
         let root = Node {
             turn: None,
@@ -81,8 +87,9 @@ impl PNS {
             tree: sm,
             root: key,
             legal: hs,
-            board: board,
+            board,
             draw_is_loss,
+            hashes,
         }
     }
 
@@ -93,10 +100,10 @@ impl PNS {
         let mut most_proving: Key;
         loop {
             let root = self.tree.get(root_key).unwrap();
-            println!(
-                "Root proofnumber: {}, Root disproofnumber: {}",
-                root.proof, root.disproof
-            );
+            // println!(
+            //     "Root proofnumber: {}, Root disproofnumber: {}",
+            //     root.proof, root.disproof
+            // );
             if root.proof == 0 || root.disproof == 0 {
                 break;
             }
@@ -201,6 +208,15 @@ impl PNS {
         };
         let mut child_keys = vec![];
         for (i, j) in &self.legal {
+            self.board.place_proof(*i, *j);
+            let hash = calculate_hash(&self.board.field);
+            if self.hashes.contains(&hash) {
+                self.board.undo(*i, *j);
+                continue;
+            } else {
+                self.hashes.insert(hash);
+            }
+            self.board.undo(*i, *j);
             let child: Node = Node {
                 turn: Some((*i, *j)),
                 proof: 1,
@@ -273,4 +289,10 @@ impl PNS {
             }
         }
     }
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }

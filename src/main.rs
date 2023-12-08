@@ -10,11 +10,10 @@ fn main() {
     // let _x = gomoku::_play(3, &mut _BLOCK.to_vec(), &mut _STUB.to_vec());
     // let v = gomoku::_simulate_alphabeta(4, &mut _STUB.to_vec(), &mut _LONGY.to_vec());
     // let v = gomoku::_simulate_minmax(5, &mut _LONGY.to_vec(), &mut _LONGY.to_vec());
-    gomoku::test(
+    gomoku::basic_pns(
         5,
         &mut _SKINNY.to_vec(),
         &mut _SKINNY.to_vec(),
-        true,
-        vec![(2, 2), (2, 3), (3, 2)],
+        vec![(2,2), (2,3)],
     );
 }
