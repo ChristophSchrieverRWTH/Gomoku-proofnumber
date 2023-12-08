@@ -48,6 +48,7 @@ impl PNS {
         shape1: &mut Vec<(i32, i32)>,
         shape2: &mut Vec<(i32, i32)>,
         draw_is_loss: bool,
+        moves_made: Vec<Turn>,
     ) -> Self {
         let mut hs = HashSet::new();
         for i in 0..size {
@@ -56,13 +57,22 @@ impl PNS {
             }
         }
         let mut sm: SlotMap<Key, Node> = SlotMap::with_key();
+        let mut board = Board::setup(size, shape1, shape2);
+        let mut root_type = match moves_made.len() % 2 {
+            0 => NodeType::OR,
+            _ => NodeType::AND,
+        };
+        for (x_cord, y_cord) in moves_made {
+            board.place_proof(x_cord, y_cord);
+            hs.remove(&(x_cord, y_cord));
+        }
         let root = Node {
             turn: None,
             proof: 1,
             disproof: 1,
             expanded: false,
             state: Status::Unknown,
-            node_type: NodeType::OR,
+            node_type: root_type,
             parent: None,
             children: vec![],
         };
@@ -71,7 +81,7 @@ impl PNS {
             tree: sm,
             root: key,
             legal: hs,
-            board: Board::setup(size, shape1, shape2),
+            board: board,
             draw_is_loss,
         }
     }
@@ -83,10 +93,10 @@ impl PNS {
         let mut most_proving: Key;
         loop {
             let root = self.tree.get(root_key).unwrap();
-            // println!(
-            //     "Root proofnumber: {}, Root disproofnumber: {}",
-            //     root.proof, root.disproof
-            // );
+            println!(
+                "Root proofnumber: {}, Root disproofnumber: {}",
+                root.proof, root.disproof
+            );
             if root.proof == 0 || root.disproof == 0 {
                 break;
             }

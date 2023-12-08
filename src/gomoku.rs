@@ -17,8 +17,14 @@ pub enum _Error {
     IllegalSize,
 }
 
-pub fn test(size: i32, shape1: &mut Vec<(i32, i32)>, shape2: &mut Vec<(i32, i32)>) {
-    let mut pns = PNS::setup(size, shape1, shape2, true);
+pub fn test(
+    size: i32,
+    shape1: &mut Vec<(i32, i32)>,
+    shape2: &mut Vec<(i32, i32)>,
+    draw_is_loss: bool,
+    moves_made: Vec<(i32, i32)>,
+) {
+    let mut pns = PNS::setup(size, shape1, shape2, draw_is_loss, moves_made);
     let state = pns.pns(pns.root);
     println!("{:?}", state);
 }
