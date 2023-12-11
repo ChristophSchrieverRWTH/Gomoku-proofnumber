@@ -93,10 +93,10 @@ impl PNS {
         let mut most_proving: Key;
         loop {
             let root = self.tree.get(root_key).unwrap();
-            println!(
-                "Root proofnumber: {}, Root disproofnumber: {}",
-                root.proof, root.disproof
-            );
+            // println!(
+            //     "Root proofnumber: {}, Root disproofnumber: {}",
+            //     root.proof, root.disproof
+            // );
             if root.proof == 0 || root.disproof == 0 {
                 break;
             }

@@ -1,7 +1,7 @@
 #![allow(unused)]
 use self::game::Board;
 use self::graph::PNS;
-// use self::pns::*;
+// use self::pns::PNS;
 use self::tree::Tree;
 use crate::gomoku::game::Tile;
 use std::collections::hash_map::DefaultHasher;
@@ -11,7 +11,7 @@ use std::num::ParseIntError;
 
 mod game;
 mod graph;
-// mod pns;
+mod pns;
 mod tree;
 pub enum _Error {
     IllegalSize,
@@ -24,9 +24,19 @@ pub fn test(
     draw_is_loss: bool,
     moves_made: Vec<(i32, i32)>,
 ) {
-    let mut pns = PNS::setup(size, shape1, shape2, draw_is_loss, moves_made);
+    let mut pns = PNS::setup(size, shape1, shape2, true, moves_made.clone());
     let state = pns.pns(pns.root);
-    println!("{:?}", state);
+    if state.0 != 0 {
+        let mut pns = PNS::setup(size, shape1, shape2, false, moves_made);
+        let state2 = pns.pns(pns.root);
+        if state2.0 == 0 {
+            println!("DRAW");
+        } else {
+            println!("PLAYER 2 WINS.");
+        }
+    } else {
+        println!("PLAYER 1 WINS.");
+    }
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {

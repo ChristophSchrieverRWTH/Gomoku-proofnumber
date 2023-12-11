@@ -13,8 +13,8 @@ fn main() {
     gomoku::test(
         5,
         &mut _SKINNY.to_vec(),
-        &mut _SKINNY.to_vec(),
+        &mut _ELLY.to_vec(),
         true,
-        vec![(2, 2), (2, 3), (3, 2)],
+        vec![(2, 2), (2, 3)],
     );
 }
