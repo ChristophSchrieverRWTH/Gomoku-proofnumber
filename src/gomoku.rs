@@ -2,6 +2,7 @@
 use self::game::Board;
 use self::graph::PNS;
 // use self::pns::PNS;
+// use self::dfpns::PNS;
 use self::tree::Tree;
 use crate::gomoku::game::Tile;
 use std::collections::hash_map::DefaultHasher;
@@ -9,6 +10,7 @@ use std::hash::{Hash, Hasher};
 use std::io;
 use std::num::ParseIntError;
 
+mod dfpns;
 mod game;
 mod graph;
 mod pns;
@@ -21,22 +23,22 @@ pub fn test(
     size: i32,
     shape1: &mut Vec<(i32, i32)>,
     shape2: &mut Vec<(i32, i32)>,
-    draw_is_loss: bool,
     moves_made: Vec<(i32, i32)>,
 ) {
     let mut pns = PNS::setup(size, shape1, shape2, true, moves_made.clone());
     let state = pns.pns(pns.root);
     if state.0 != 0 {
         let mut pns = PNS::setup(size, shape1, shape2, false, moves_made);
-        let state2 = pns.pns(pns.root);
-        if state2.0 == 0 {
-            println!("DRAW");
+        let state = pns.pns(pns.root);
+        if state.0 == 0 {
+            println!("Draw.");
         } else {
-            println!("PLAYER 2 WINS.");
+            println!("Player 2 wins.");
         }
     } else {
-        println!("PLAYER 1 WINS.");
+        println!("Player 1 wins.")
     }
+    // let state = pns.dfpn(pns.root);
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
